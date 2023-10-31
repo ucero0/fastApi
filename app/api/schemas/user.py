@@ -1,16 +1,19 @@
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
+from typing import Optional
 
 class UserBase(BaseModel):
-    id: int
     email: EmailStr
 
 class UserCreate(UserBase):
     password: str
 
 class UserCreateResponse(UserBase):
+    id: int
     is_active: bool
     is_superuser: bool
-    created_at: str
+    created_at: datetime
+
     class Config:
-        orm_mode = True
+        from_attributes = True
 

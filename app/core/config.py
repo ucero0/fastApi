@@ -1,8 +1,8 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    USERNAME : str
+    USERNAME_DB : str
     PASSWORD :str 
     IP_ADRESS :int|str 
     PORT :int     
@@ -14,3 +14,7 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
+if __name__ == '__main__':
+    settings = Settings()
+    print(settings.__dict__.keys())
+    print(settings.USERNAME_DB)
