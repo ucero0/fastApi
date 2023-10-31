@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from core.config import settings
+from ..core.config import settings
 from sqlalchemy.exc import OperationalError
 
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://{settings.USERNAME_DB}:{settings.PASSWORD}@{settings.IP_ADRESS}:{settings.PORT}/{settings.DATABASE_NAME}"

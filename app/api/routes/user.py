@@ -1,25 +1,25 @@
 from typing import List
 from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
-from db.session import get_db
-import models
-import schemas.user
-from core.security import verify_password,get_password_hash
+from ...db.session import get_db
+from ..models import user as modelsUser
+from ..schemas import user as  userSchema
+from ...core.security import verify_password,get_password_hash
 
-router = APIRouter(
+userRoute = APIRouter(
     prefix="/user",
     tags=["Users"],
     responses={404: {"description": "Not found"}},
 )
 # create user
-@router.post(status_code=status.HTTP_201_CREATED, response_model=schemas.user.UserCreateResponse)
-def create_user(user: schemas.user.UserCreate, db: Session = Depends(get_db)):
+@userRoute.post('',status_code=status.HTTP_201_CREATED, response_model=userSchema.UserCreateResponse)
+def create_user(user: userSchema.UserCreate, db: Session = Depends(get_db)):
     def get_user_by_email(db: Session, email: str):
-        return db.query(models.user.User).filter(models.user.User.email == email).first()
+        return db.query(modelsUser.User).filter(modelsUser.User.email == email).first()
     
-    def create_user(db: Session, user: schemas.user.UserCreate):
+    def create_user(db: Session, user: userSchema.UserCreate):
         user.password = get_password_hash(user.password)
-        db_user = models.user.User(**user.dict())
+        db_user = modelsUser.User(**user.dict())
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -32,17 +32,17 @@ def create_user(user: schemas.user.UserCreate, db: Session = Depends(get_db)):
         user = create_user(db=db, user=user)
         return user
 
-@router.get(response_model=List[schemas.user.UserCreateResponse])
+@userRoute.get('',response_model=List[userSchema.UserCreateResponse])
 def get_users(db: Session = Depends(get_db)):
     def get_users(db: Session):
-        return db.query(models.user.User).all()
+        return db.query(modelsUser.User).all()
     return get_users(db)
 
 # login user
-@router.get("/login", response_model=schemas.user.UserCreateResponse)
-def login_user(user: schemas.user.UserCreate, db: Session = Depends(get_db)):
+@userRoute.get("/login", response_model=userSchema.UserCreateResponse)
+def login_user(user: userSchema.UserCreate, db: Session = Depends(get_db)):
     def get_user_by_email(db: Session, email: str):
-        return db.query(models.user.User).filter(models.user.User.email == email).first()
+        return db.query(modelsUser.User).filter(modelsUser.User.email == email).first()
     
     db_user = get_user_by_email(db, email=user.email)
     incorrectPassOrEmail = HTTPException(status_code=400, detail="Email or password incorrect")
