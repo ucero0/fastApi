@@ -5,10 +5,10 @@ from typing import Optional
 class UserBase(BaseModel):
     email: EmailStr
 
-class UserCreate(UserBase):
+class UserLogin(UserBase):
     password: str
 
-class UserCreateResponse(UserBase):
+class UserResponse(UserBase):
     id: int
     is_active: bool
     is_superuser: bool
@@ -16,4 +16,18 @@ class UserCreateResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+class TokenPayload(UserBase):
+    id: int
+    is_active: bool
+    is_superuser: bool
+
+    class Config:
+        from_attributes = True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
 

@@ -12,12 +12,12 @@ userRoute = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 # create user
-@userRoute.post('',status_code=status.HTTP_201_CREATED, response_model=userSchema.UserCreateResponse)
-def create_user(user: userSchema.UserCreate, db: Session = Depends(get_db)):
+@userRoute.post('',status_code=status.HTTP_201_CREATED, response_model=userSchema.UserResponse)
+def create_user(user: userSchema.UserLogin, db: Session = Depends(get_db)):
     def get_user_by_email(db: Session, email: str):
         return db.query(modelsUser.User).filter(modelsUser.User.email == email).first()
     
-    def create_user(db: Session, user: userSchema.UserCreate):
+    def create_user(db: Session, user: userSchema.UserLogin):
         user.password = get_password_hash(user.password)
         db_user = modelsUser.User(**user.dict())
         db.add(db_user)
@@ -32,24 +32,8 @@ def create_user(user: userSchema.UserCreate, db: Session = Depends(get_db)):
         user = create_user(db=db, user=user)
         return user
 
-@userRoute.get('',response_model=List[userSchema.UserCreateResponse])
+@userRoute.get('',response_model=List[userSchema.UserResponse])
 def get_users(db: Session = Depends(get_db)):
     def get_users(db: Session):
         return db.query(modelsUser.User).all()
     return get_users(db)
-
-# login user
-@userRoute.get("/login", response_model=userSchema.UserCreateResponse)
-def login_user(user: userSchema.UserCreate, db: Session = Depends(get_db)):
-    def get_user_by_email(db: Session, email: str):
-        return db.query(modelsUser.User).filter(modelsUser.User.email == email).first()
-    
-    db_user = get_user_by_email(db, email=user.email)
-    incorrectPassOrEmail = HTTPException(status_code=400, detail="Email or password incorrect")
-    if db_user:
-        if verify_password(user.password, db_user.password):
-            return db_user
-        else:
-            raise incorrectPassOrEmail
-    else:
-        raise incorrectPassOrEmail
