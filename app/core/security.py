@@ -3,6 +3,7 @@ from passlib.context import CryptContext
 from ..core.config import tokenSetings
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
+from ..api.schemas.user import TokenPayload, Token
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,13 +24,8 @@ def create_access_token(payload: dict):
     token = jwt.encode(to_encode, tokenSetings.SECRET_KEY, algorithm=tokenSetings.ALGORITHM)
     return token 
 
-def verify_token(token: str, credentials_exception):
-    try:
-        payload = jwt.decode(token, tokenSetings.SECRET_KEY, algorithms=tokenSetings.ALGORITHM)
-        email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-        token_data = TokenPayload(email=email)
-    except JWTError:
-        raise credentials_exception
-    return token_data
+def decode_token(token: Token):
+    payload = jwt.decode(token.access_token, tokenSetings.SECRET_KEY, algorithms=tokenSetings.ALGORITHM)
+    payload = TokenPayload(**payload)
+    return payload
+        

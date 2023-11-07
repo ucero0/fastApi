@@ -10,6 +10,7 @@ userRoute = APIRouter(
     prefix="/user",
     tags=["Users"],
     responses={404: {"description": "Not found"}},
+    
 )
 # create user
 @userRoute.post('',status_code=status.HTTP_201_CREATED, response_model=userSchema.UserResponse)
@@ -19,7 +20,7 @@ def create_user(user: userSchema.UserLogin, db: Session = Depends(get_db)):
     
     def create_user(db: Session, user: userSchema.UserLogin):
         user.password = get_password_hash(user.password)
-        db_user = modelsUser.User(**user.dict())
+        db_user = modelsUser.User(**user.model_dump())
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -34,6 +35,6 @@ def create_user(user: userSchema.UserLogin, db: Session = Depends(get_db)):
 
 @userRoute.get('',response_model=List[userSchema.UserResponse])
 def get_users(db: Session = Depends(get_db)):
-    def get_users(db: Session):
-        return db.query(modelsUser.User).all()
-    return get_users(db)
+    def get_users(db: Session, model):
+        return db.query(model).all()
+    return get_users(db, modelsUser.User)
